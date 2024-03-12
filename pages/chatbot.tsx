@@ -157,8 +157,21 @@ export default function Home() {
   useEffect(() =>{
     fetchUnlockedClasses();
   }, [])
+  async function checkIfUnlocked(){
 
-  useEffect(() => {
+    let isProf = false;
+
+    const sessionRes = await fetch('/api/userInfo');
+    const sessionData = await sessionRes.json();
+    if (sessionRes.ok) {
+      // Set userID to the user's email from the session
+      isProf = sessionData.isProfessor;
+    } else {
+      // Handle the case where the session is not available
+      console.error('Session not found:', sessionData.error);
+      return;
+    }
+
     let title = courseTitle;
     if(typeof(title) === 'string'){
       title = title.replace(/_/g, " ");
@@ -166,11 +179,16 @@ export default function Home() {
     else{
       return;
     }
-    if(fetchedUnlockedClasses && courseTitle && !(unlockedClasses.includes(title))){
+    if( (isProf === false) && fetchedUnlockedClasses && courseTitle && !(unlockedClasses.includes(title))){
       console.log(unlockedClasses, 'testing');
       router.push(`/coursePage`);
     }
+  }
+
+  useEffect(() => {
+    checkIfUnlocked();
   }, [courseTitle, unlockedClasses]);
+
 
 
 
